@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水域活動檢核表</title>
+    <style>
+        /* 基礎樣式設定 */
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* 主要容器樣式 */
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 標題樣式 */
+        h1 {
+            color: #005a9c;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        /* 更新後的表頭資訊區塊 */
+        .header-info {
+            display: flex;
+            flex-direction: column; /* 改為垂直排列 */
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* 新增的網格容器，用於排列單位下方的項目 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 響應式網格 */
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-item label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #005a9c;
+        }
+
+        .info-item input[type="text"],
+        .info-item input[type="date"],
+        .info-item select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .info-item input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .session-options, .category-options, .rental-options {
+            display: flex;
+            flex-wrap: wrap; /* 允許換行 */
+            gap: 15px;
+            align-items: center;
+            padding-top: 10px;
+        }
+        
+        .session-options label, .category-options label, .rental-options label {
+            font-weight: normal;
+            margin-bottom: 0;
+            color: #333;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .session-options input[type="radio"], .category-options input[type="checkbox"], .rental-options input[type="checkbox"] {
+            margin-right: 5px;
+            width: 18px;
+            height: 18px;
+        }
+
+
+        /* 可摺疊按鈕樣式 */
+        .collapsible {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            padding: 18px 20px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1em;
+            margin-top: 12px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 滑鼠懸停與啟用狀態的按鈕樣式 */
+        .collapsible:hover, .collapsible.active {
+            background-color: #0056b3;
+        }
+
+        /* 按鈕後的 +/- 符號 */
+        .collapsible:after {
+            content: '\002B'; /* 加號 */
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible.active:after {
+            content: "\2212"; /* 減號 */
+            transform: rotate(180deg);
+        }
+
+        /* 內容區塊樣式 */
+        .content {
+            padding: 0;
+            overflow: hidden;
+            background-color: #ffffff;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            display: none; /* 預設隱藏 */
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle; /* 垂直置中 */
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+
+        /* 表單元素樣式 */
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #007bff;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 90%;
+            box-sizing: border-box; /* 確保 padding 不會影響寬度 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>水域活動檢核表</h1>
+
+        <!-- 更新後的表頭資訊 -->
+        <div class="header-info">
+            <div class="info-item">
+                <label for="unit">主辦單位</label>
+                <input type="text" id="unit" value="東河國小-面海學校" readonly>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label for="registered-unit">報名單位</label>
+                    <input type="text" id="registered-unit" placeholder="請輸入報名單位">
+                </div>
+                <div class="info-item">
+                    <label for="activity-leader">活動負責人</label>
+                    <input type="text" id="activity-leader" placeholder="請輸入姓名">
+                </div>
+                <div class="info-item">
+                    <label for="contact-info">負責人及聯絡方式</label>
+                    <input type="text" id="contact-info" placeholder="請輸入姓名與電話">
+                </div>
+                <div class="info-item">
+                    <label for="participants-num">學員人數</label>
+                    <input type="text" id="participants-num" placeholder="請輸入人數">
+                </div>
+                 <div class="info-item">
+                    <label for="instructor-ratio">講師助教學員比例</label>
+                    <input type="text" id="instructor-ratio" placeholder="例如: 1:6">
+                </div>
+                <div class="info-item">
+                    <label for="activity-date">日期</label>
+                    <input type="date" id="activity-date">
+                </div>
+                <div class="info-item">
+                    <label for="location">地點</label>
+                    <select id="location" name="location">
+                        <option value="">請選擇地點</option>
+                        <option value="活水湖">活水湖</option>
+                        <option value="新蘭漁港">新蘭漁港</option>
+                        <option value="加母子灣">加母子灣</option>
+                        <option value="美麗灣">美麗灣</option>
+                        <option value="海賊灣">海賊灣</option>
+                    </select>
+                </div>
+                <div class="info-item">
+                    <label for="filler-name">填表人</label>
+                    <input type="text" id="filler-name" placeholder="請輸入姓名">
+                </div>
+                <div class="info-item">
+                    <label>類別</label>
+                    <div class="category-options">
+                        <label><input type="checkbox" name="category" value="sup">SUP</label>
+                        <label><input type="checkbox" name="category" value="canoe">獨木舟</label>
+                        <label><input type="checkbox" name="category" value="sea-training">海訓</label>
+                        <label><input type="checkbox" name="category" value="experience">體驗場</label>
+                        <label><input type="checkbox" name="category" value="family">親子場</label>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <label>場次</label>
+                    <div class="session-options">
+                        <label><input type="radio" id="am-session" name="session" value="am">上午場</label>
+                        <label><input type="radio" id="pm-session" name="session" value="pm">下午場</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：行政與文件作業 -->
+        <button class="collapsible active">行政與文件作業</button>
+        <div class="content" style="display: block;">
+            <table>
+                <tr><th>項目</th><th>數量</th><th>確認</th><th>備註</th></tr>
+                <tr>
+                    <td>場地租借</td>
+                    <td><input type="text" size="5"></td>
+                    <td><input type="checkbox"></td>
+                    <td>
+                        <div class="rental-options">
+                           <label><input type="checkbox" name="rental-dept">農業處</label>
+                           <label><input type="checkbox" name="rental-dept">海巡</label>
+                           <label><input type="checkbox" name="rental-dept">東管處</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr><td>發公文</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>公共意外責任險&水域遊憩責任險</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>水域遊憩責任險名單上傳</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>學員水域活動同意書</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>下水前建議及體驗活動流程表</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>傳給報名單位負責人</td></tr>
+                <tr><td>講師、助教及救生員名單</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>學員/助教名單回傳講師</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>簽到表 & 憑證</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>派車單 & 公假</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+            </table>
+        </div>
+
+        <!-- 主要器材 -->
+        <button class="collapsible">主要器材</button>
+        <div class="content">
+            <table>
+                <tr><th>項目</th><th>數量</th><th>確認</th><th>備註</th></tr>
+                <tr><td>SUP 板子</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(黃20藍23槳43)</td></tr>
+                <tr><td>SUP 配件 (槳、腳繩、舵)</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(黃20藍23槳43)</td></tr>
+                <tr><td>獨木舟 (單、雙、參)</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(1參15雙10單)</td></tr>
+                <tr><td>獨木舟槳</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(40)</td></tr>
+            </table>
+        </div>
+
+        <!-- 安全裝備 -->
+        <button class="collapsible">安全裝備</button>
+        <div class="content">
+            <table>
+                <tr><th>項目</th><th>數量</th><th>確認</th><th>備註</th></tr>
+                <tr><td>頭盔</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(30黃5紅 10NSR)</td></tr>
+                <tr><td>救生衣 (大人、小孩)</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(25大 30小 4小小)</td></tr>
+                <tr><td>救生衣(教練用-藍色)</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>AED</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>急救箱</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>哨子</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+            </table>
+        </div>
+
+        <!-- 周邊配件與工具 -->
+        <button class="collapsible">周邊配件與工具</button>
+        <div class="content">
+            <table>
+                <tr><th>項目</th><th>數量</th><th>確認</th><th>備註</th></tr>
+                <tr><td>凹型泡棉墊</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(2個)</td></tr>
+                <tr><td>拉船繩</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>浮球 (錨)</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(五顆五錨)</td></tr>
+                <tr><td>對講機</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>望遠鏡</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>小蜜蜂</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+            </table>
+        </div>
+
+        <!-- 岸上與行政用品 -->
+        <button class="collapsible">岸上與行政用品</button>
+        <div class="content">
+            <table>
+                <tr><th>項目</th><th>數量</th><th>確認</th><th>備註</th></tr>
+                <tr><td>帳篷</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(2頂1側雨擋)</td></tr>
+                <tr><td>桌子</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(折疊4椅子4)</td></tr>
+                <tr><td>椅子</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>水域宣導板</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(1)</td></tr>
+                <tr><td>布條</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>更衣帳</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(4頂)</td></tr>
+                <tr><td>行動馬桶</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>飲用水架</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>水桶</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>冰桶</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>便當</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>垃圾袋</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>衛生紙</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>濕紙巾</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>茶點、水</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>攝影器材</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>(Gopro、TG、配件電池)</td></tr>
+                <tr><td>HDMI線</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>毛巾衣</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>黃T</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>小藍白貨櫃鑰匙</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>全開紙</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>麥克筆、原子筆</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+            </table>
+        </div>
+
+        <!-- 個人建議裝備 -->
+        <button class="collapsible">個人建議裝備</button>
+        <div class="content">
+            <table>
+                <tr><th>項目</th><th>數量</th><th>確認</th><th>備註</th></tr>
+                <tr><td>防曬用品 (如防曬乳、帽子、太陽眼鏡)</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>合適的水域服裝 (如防磨衣、水母褲)</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>換洗衣物</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>毛巾</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>防水袋</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td>保護個人物品</td></tr>
+                <tr><td>個人藥品</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>充足飲用水</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+                <tr><td>拖鞋或水陸兩用鞋</td><td><input type="text" size="5"></td><td><input type="checkbox"></td><td></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 取得所有 class 為 "collapsible" 的元素
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            // 為每個元素加上點擊事件監聽器
+            coll[i].addEventListener("click", function() {
+                // 切換 active class
+                this.classList.toggle("active");
+                // 取得下一個兄弟元素 (也就是 content div)
+                var content = this.nextElementSibling;
+                // 判斷 content 的 display 狀態並切換
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
